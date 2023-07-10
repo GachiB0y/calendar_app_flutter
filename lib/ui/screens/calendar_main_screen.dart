@@ -1,17 +1,12 @@
-import 'package:calendar_app_flutter/pages/basics_example.dart';
-import 'package:calendar_app_flutter/pages/complex_example.dart';
-import 'package:calendar_app_flutter/pages/multi_example.dart';
-import 'package:calendar_app_flutter/pages/range_example.dart';
-import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:calendar_app_flutter/pages/bloc_complex.dart';
 
-import '../../pages/events_example.dart';
+import 'package:flutter/material.dart';
 
 class CalendarMainScreen extends StatelessWidget {
   const CalendarMainScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return TableComplexExample();
+    return const TableComplexExampleBloc();
   }
 }
