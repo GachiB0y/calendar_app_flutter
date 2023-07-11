@@ -2,6 +2,7 @@
 
 // import 'package:calendar_app_flutter/domain/blocs/events_bloc.dart';
 // import 'package:calendar_app_flutter/utils/config.dart';
+// import 'package:calendar_app_flutter/utils/constants.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:intl/intl.dart';
@@ -11,18 +12,22 @@
 
 // import '../utils/utils.dart';
 
-// class TableComplexExampleBloc extends StatefulWidget {
-//   const TableComplexExampleBloc({super.key});
+// class TableComplexBlocLandscape extends StatefulWidget {
+//   const TableComplexBlocLandscape({super.key});
 
 //   @override
-//   _TableComplexExampleBlocState createState() =>
-//       _TableComplexExampleBlocState();
+//   _TableComplexBlocLandscapeState createState() =>
+//       _TableComplexBlocLandscapeState();
 // }
 
-// class _TableComplexExampleBlocState extends State<TableComplexExampleBloc> {
+// class _TableComplexBlocLandscapeState extends State<TableComplexBlocLandscape> {
 //   late final ValueNotifier<List<Event>> _selectedEvents;
 //   final ValueNotifier<DateTime> _focusedDay = ValueNotifier(DateTime.now());
 //   final Set<DateTime> _selectedDays = LinkedHashSet<DateTime>(
+//     equals: isSameDay,
+//     hashCode: getHashCode,
+//   );
+//   final Set<DateTime> _selectedDaysActive = LinkedHashSet<DateTime>(
 //     equals: isSameDay,
 //     hashCode: getHashCode,
 //   );
@@ -78,6 +83,18 @@
 
 //   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
 //     setState(() {
+//       final dateNow = DateTime(kToday.year, kToday.month, kToday.day);
+//       final dateSelected =
+//           DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+
+//       if (dateSelected.isAfter(dateNow) ||
+//           dateSelected.isAtSameMomentAs(dateNow)) {
+//         if (_selectedDaysActive.contains(selectedDay)) {
+//           _selectedDaysActive.remove(selectedDay);
+//         } else {
+//           _selectedDaysActive.add(selectedDay);
+//         }
+//       }
 //       if (_selectedDays.contains(selectedDay)) {
 //         _selectedDays.remove(selectedDay);
 //       } else {
@@ -146,8 +163,41 @@
 //           );
 //         } else if (state is EventListLoaded) {
 //           return Scaffold(
+//             floatingActionButton: _selectedDaysActive.isNotEmpty
+//                 ? FittedBox(
+//                     child: ValueListenableBuilder<List<Event>>(
+//                         valueListenable: _selectedEvents,
+//                         builder: (context, value, _) {
+//                           return FloatingActionButton.extended(
+//                             onPressed: () => showDialog(
+//                               context: context,
+//                               builder: (BuildContext context) =>
+//                                   _AlertDialogAddEventWidget(
+//                                 eventBloc: eventBloc,
+//                                 selectedEvents: value,
+//                                 addEvent: _addEventsForDay,
+//                                 focusedDay: _selectedDays.last,
+//                               ),
+//                             ),
+//                             icon: const Icon(Icons.add),
+//                             label: Text(
+//                               "Добавить событие на день: ${_selectedDays.last.day}",
+//                               style: const TextStyle(fontSize: 24),
+//                             ),
+//                           );
+//                         }),
+//                   )
+//                 : const SizedBox.shrink(),
+//             appBar: AppBar(
+//               backgroundColor: kPrimeyColorGreen,
+//               title: const Center(
+//                   child: Text(
+//                 "Переговорная на 2 этаже",
+//                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
+//               )),
+//             ),
 //             body: Padding(
-//               padding: const EdgeInsets.only(top: 50.0),
+//               padding: const EdgeInsets.only(top: 20.0),
 //               child: Column(
 //                 children: [
 //                   ValueListenableBuilder<DateTime>(
@@ -184,22 +234,42 @@
 //                     },
 //                   ),
 //                   TableCalendar<Event>(
+//                     daysOfWeekHeight: 28,
 //                     calendarStyle: CalendarStyle(
+//                       todayTextStyle: TextStyle(
+//                           color: Colors.white, fontSize: fontSizeTextCalendar),
+//                       selectedTextStyle: TextStyle(
+//                           color: Colors.white, fontSize: fontSizeTextCalendar),
+//                       outsideTextStyle: TextStyle(
+//                           color: const Color(0xFFAEAEAE),
+//                           fontSize: fontSizeTextCalendar),
+//                       defaultTextStyle: TextStyle(
+//                           color: currentTheme.isDarkTheme
+//                               ? Colors.white
+//                               : Colors.black,
+//                           fontSize: fontSizeTextCalendar),
 //                       markerDecoration: BoxDecoration(
 //                           color: currentTheme.isDarkTheme
 //                               ? Colors.white
 //                               : const Color(0xFF263238),
 //                           shape: BoxShape.circle),
-//                       selectedDecoration: const BoxDecoration(
-//                           color: Color(0xFF56BE64), shape: BoxShape.circle),
-//                       todayDecoration: const BoxDecoration(
-//                           color: Color.fromARGB(141, 86, 190, 100),
-//                           shape: BoxShape.circle),
-//                       holidayDecoration: const BoxDecoration(
-//                           border: Border.fromBorderSide(
-//                               BorderSide(color: Color(0xFF56BE64), width: 1.4)),
-//                           shape: BoxShape.circle),
-//                       holidayTextStyle: const TextStyle(color: Colors.red),
+//                       selectedDecoration: BoxDecoration(
+//                           shape: BoxShape.rectangle,
+//                           color: const Color(0xFF56BE64),
+//                           borderRadius: BorderRadius.circular(10)),
+//                       todayDecoration: BoxDecoration(
+//                         color: const Color.fromARGB(141, 86, 190, 100),
+//                         shape: BoxShape.rectangle,
+//                         borderRadius: BorderRadius.circular(10),
+//                       ),
+//                       holidayDecoration: BoxDecoration(
+//                         borderRadius: BorderRadius.circular(10),
+//                         border: const Border.fromBorderSide(
+//                             BorderSide(color: Color(0xFF56BE64), width: 1.4)),
+//                         shape: BoxShape.rectangle,
+//                       ),
+//                       holidayTextStyle: TextStyle(
+//                           color: Colors.red, fontSize: fontSizeTextCalendar),
 //                     ),
 //                     startingDayOfWeek: StartingDayOfWeek.monday,
 //                     locale: 'ru_RU',
@@ -239,7 +309,9 @@
 //                           return Center(
 //                             child: Text(
 //                               text,
-//                               style: const TextStyle(color: Colors.red),
+//                               style: TextStyle(
+//                                   color: Colors.red,
+//                                   fontSize: fontSizeTextCalendar),
 //                             ),
 //                           );
 //                         } else {
@@ -248,50 +320,27 @@
 //                             child: Text(
 //                               text,
 //                               style: TextStyle(
-//                                 color: currentTheme.isDarkTheme
-//                                     ? Colors.white
-//                                     : const Color(0xFF263238),
-//                               ),
+//                                   color: currentTheme.isDarkTheme
+//                                       ? Colors.white
+//                                       : const Color(0xFF263238),
+//                                   fontSize: fontSizeTextCalendar),
 //                             ),
 //                           );
 //                         }
-//                         return null;
 //                       },
 //                     ),
 //                   ),
 //                   const SizedBox(height: 25.0),
-//                   _selectedDays.isNotEmpty
-//                       ? ValueListenableBuilder<List<Event>>(
-//                           valueListenable: _selectedEvents,
-//                           builder: (context, value, _) {
-//                             return ElevatedButton.icon(
-//                               onPressed: () => showDialog(
-//                                 context: context,
-//                                 builder: (BuildContext context) =>
-//                                     _AlertDialogWidget(
-//                                   eventBloc: eventBloc,
-//                                   selectedEvents: value,
-//                                   addEvent: _addEventsForDay,
-//                                   focusedDay: _selectedDays.last,
-//                                 ),
-//                               ),
-//                               icon: const Icon(Icons.add),
-//                               label: Text(
-//                                 "Добавить событие на день: ${_selectedDays.last.day}",
-//                                 style: const TextStyle(color: Colors.black),
-//                               ),
-//                             );
-//                           },
-//                         )
-//                       : const SizedBox.shrink(),
 //                   Expanded(
 //                     child: ValueListenableBuilder<List<Event>>(
 //                       valueListenable: _selectedEvents,
 //                       builder: (context, value, _) {
 //                         return ListView.builder(
+//                           scrollDirection: Axis.horizontal,
 //                           itemCount: value.length,
 //                           itemBuilder: (context, index) {
 //                             return Container(
+//                               width: 350,
 //                               margin: const EdgeInsets.symmetric(
 //                                 horizontal: 12.0,
 //                                 vertical: 4.0,
@@ -305,26 +354,32 @@
 //                               ),
 //                               child: Stack(children: [
 //                                 Padding(
-//                                   padding: const EdgeInsets.all(16.0),
+//                                   padding: const EdgeInsets.only(
+//                                       left: 16.0,
+//                                       right: 16.0,
+//                                       bottom: 16.0,
+//                                       top: 24.0),
 //                                   child: ListTile(
-//                                     onTap: () =>
-//                                         print('${_selectedDays.last.day}'),
+//                                     onTap: () => showDialog(
+//                                         context: context,
+//                                         builder: (BuildContext context) =>
+//                                             _AlertDialogEventInfo()),
 //                                     title: Text(
 //                                       '${value[index]}',
-//                                       style:
-//                                           const TextStyle(color: Colors.black),
+//                                       style: const TextStyle(
+//                                           color: Colors.black, fontSize: 18),
 //                                     ),
 //                                   ),
 //                                 ),
 //                                 Padding(
 //                                   padding: const EdgeInsets.only(
-//                                       right: 8.0, top: 4.0),
+//                                       left: 12.0, top: 12.0),
 //                                   child: Align(
-//                                     alignment: Alignment.topRight,
+//                                     alignment: Alignment.topLeft,
 //                                     child: Text(
 //                                       '${DateFormat.MMMMd('ru_RU').format(value[index].date!)} ${value[index].time!.format(context)}',
-//                                       style:
-//                                           const TextStyle(color: Colors.black),
+//                                       style: const TextStyle(
+//                                           color: Colors.black, fontSize: 16),
 //                                     ),
 //                                   ),
 //                                 ),
@@ -386,23 +441,23 @@
 //           ),
 //           if (clearButtonVisible)
 //             IconButton(
-//               icon: const Icon(Icons.clear, size: 20.0),
+//               icon: Icon(Icons.clear, size: sizeIcon),
 //               visualDensity: VisualDensity.compact,
 //               onPressed: onClearButtonTap,
 //             ),
 //           IconButton(
-//             icon: const Icon(Icons.brightness_4),
+//             icon: Icon(Icons.brightness_4, size: sizeIcon),
 //             onPressed: () {
 //               changeTheme();
 //             },
 //           ),
 //           const Spacer(),
 //           IconButton(
-//             icon: const Icon(Icons.chevron_left),
+//             icon: Icon(Icons.chevron_left, size: sizeIcon),
 //             onPressed: onLeftArrowTap,
 //           ),
 //           IconButton(
-//             icon: const Icon(Icons.chevron_right),
+//             icon: Icon(Icons.chevron_right, size: sizeIcon),
 //             onPressed: onRightArrowTap,
 //           ),
 //         ],
@@ -411,7 +466,7 @@
 //   }
 // }
 
-// class _AlertDialogWidget extends StatefulWidget {
+// class _AlertDialogAddEventWidget extends StatefulWidget {
 //   final List<Event> selectedEvents;
 //   final EventListViewBloc eventBloc;
 //   final void Function(
@@ -419,7 +474,7 @@
 //       required Event event,
 //       required EventListViewBloc eventBloc}) addEvent;
 //   final DateTime focusedDay;
-//   const _AlertDialogWidget({
+//   const _AlertDialogAddEventWidget({
 //     Key? key,
 //     required this.selectedEvents,
 //     required this.addEvent,
@@ -428,10 +483,12 @@
 //   }) : super(key: key);
 
 //   @override
-//   State<_AlertDialogWidget> createState() => _AlertDialogWidgetState();
+//   State<_AlertDialogAddEventWidget> createState() =>
+//       _AlertDialogAddEventWidgetState();
 // }
 
-// class _AlertDialogWidgetState extends State<_AlertDialogWidget> {
+// class _AlertDialogAddEventWidgetState
+//     extends State<_AlertDialogAddEventWidget> {
 //   @override
 //   Widget build(BuildContext context) {
 //     TextEditingController controller = TextEditingController();
@@ -442,6 +499,7 @@
 //         mainAxisSize: MainAxisSize.min,
 //         children: [
 //           Container(
+//             width: 500,
 //             decoration: BoxDecoration(
 //               color: Colors.white,
 //               borderRadius: BorderRadius.circular(10),
@@ -502,6 +560,42 @@
 //             ),
 //           ),
 //         ],
+//       ),
+//     );
+//   }
+// }
+
+// class _AlertDialogEventInfo extends StatelessWidget {
+//   const _AlertDialogEventInfo({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Dialog(
+//       child: Container(
+//         padding: EdgeInsets.all(16.0),
+//         width: 500,
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.circular(20),
+//         ),
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             RichText(
+//               text: const TextSpan(
+//                   text: 'Где:\n\nКогда:',
+//                   style: TextStyle(color: Colors.black)),
+//             ),
+//             const SizedBox(
+//               height: 10,
+//             ),
+//             Center(
+//                 child: ElevatedButton(
+//                     onPressed: () => {Navigator.of(context).pop()},
+//                     child: const Text('OK')))
+//           ],
+//         ),
 //       ),
 //     );
 //   }

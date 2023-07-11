@@ -1,4 +1,4 @@
-import 'package:calendar_app_flutter/pages/bloc_complex.dart';
+import 'package:calendar_app_flutter/pages/complex_example.dart';
 
 import 'package:flutter/material.dart';
 
@@ -7,6 +7,14 @@ class CalendarMainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const TableComplexExampleBloc();
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        if (orientation == Orientation.landscape) {
+          return const Center(child: TableComplexBlocLandscapeTest());
+        } else {
+          return const TableComplexBlocLandscapeTest();
+        }
+      },
+    );
   }
 }
