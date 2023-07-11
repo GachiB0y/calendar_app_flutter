@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:bloc/bloc.dart';
 import 'package:calendar_app_flutter/domain/api_client/event_api_client.dart';
 import 'package:calendar_app_flutter/domain/repository/event_repositort.dart';
-import 'package:calendar_app_flutter/utils.dart';
+import 'package:calendar_app_flutter/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';

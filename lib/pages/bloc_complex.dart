@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:calendar_app_flutter/domain/blocs/events_bloc.dart';
+import 'package:calendar_app_flutter/utils/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +9,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../domain/entity/event.dart';
 
-import '../utils.dart';
+import '../utils/utils.dart';
 
 class TableComplexExampleBloc extends StatefulWidget {
   const TableComplexExampleBloc({super.key});
@@ -124,6 +125,12 @@ class _TableComplexExampleBlocState extends State<TableComplexExampleBloc> {
     ));
   }
 
+  void _changeTheme() {
+    setState(() {
+      currentTheme.toggleTheme();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final EventListViewBloc eventBloc = context.watch<EventListViewBloc>();
@@ -172,21 +179,27 @@ class _TableComplexExampleBlocState extends State<TableComplexExampleBloc> {
                             curve: Curves.easeOut,
                           );
                         },
+                        changeTheme: _changeTheme,
                       );
                     },
                   ),
                   TableCalendar<Event>(
-                    availableCalendarFormats: {CalendarFormat.month: "Июль"},
-                    calendarStyle: const CalendarStyle(
-                      selectedDecoration: BoxDecoration(
+                    calendarStyle: CalendarStyle(
+                      markerDecoration: BoxDecoration(
+                          color: currentTheme.isDarkTheme
+                              ? Colors.white
+                              : const Color(0xFF263238),
+                          shape: BoxShape.circle),
+                      selectedDecoration: const BoxDecoration(
                           color: Color(0xFF56BE64), shape: BoxShape.circle),
-                      todayDecoration: BoxDecoration(
+                      todayDecoration: const BoxDecoration(
                           color: Color.fromARGB(141, 86, 190, 100),
                           shape: BoxShape.circle),
-                      holidayDecoration: BoxDecoration(
+                      holidayDecoration: const BoxDecoration(
                           border: Border.fromBorderSide(
                               BorderSide(color: Color(0xFF56BE64), width: 1.4)),
                           shape: BoxShape.circle),
+                      holidayTextStyle: const TextStyle(color: Colors.red),
                     ),
                     startingDayOfWeek: StartingDayOfWeek.monday,
                     locale: 'ru_RU',
@@ -218,21 +231,22 @@ class _TableComplexExampleBlocState extends State<TableComplexExampleBloc> {
                         setState(() => _calendarFormat = format);
                       }
                     },
-                    // calendarBuilders: CalendarBuilders(
-                    //   dowBuilder: (context, day) {
-                    //     if (day.weekday == DateTime.sunday) {
-                    //       final text = DateFormat.E().format(day);
-                    //       return Center(
-                    //         child: Text(
-                    //           text,
-                    //           style: TextStyle(color: Colors.red),
-                    //         ),
-                    //       );
-                    //     }
-                    //   },
-                    // ),
+                    calendarBuilders: CalendarBuilders(
+                      dowBuilder: (context, day) {
+                        if (day.weekday == DateTime.sunday ||
+                            day.weekday == DateTime.saturday) {
+                          final text = DateFormat.E('ru_RU').format(day);
+                          return Center(
+                            child: Text(
+                              text,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          );
+                        }
+                      },
+                    ),
                   ),
-                  const SizedBox(height: 8.0),
+                  const SizedBox(height: 25.0),
                   _selectedDays.isNotEmpty
                       ? ValueListenableBuilder<List<Event>>(
                           valueListenable: _selectedEvents,
@@ -277,8 +291,23 @@ class _TableComplexExampleBlocState extends State<TableComplexExampleBloc> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: ListTile(
-                                onTap: () => print('${value[index]}'),
-                                title: Text('${value[index]}'),
+                                onTap: () => print(
+                                    '${eventBloc.state.kEvents[_selectedDays.last]}'),
+                                title: Row(
+                                  children: [
+                                    Text(
+                                      '${value[index]}',
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                    ),
+                                    Spacer(),
+                                    Text(
+                                      'День',
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -307,6 +336,7 @@ class _CalendarHeader extends StatelessWidget {
   final VoidCallback onTodayButtonTap;
   final VoidCallback onClearButtonTap;
   final bool clearButtonVisible;
+  final void Function() changeTheme;
 
   const _CalendarHeader({
     Key? key,
@@ -316,6 +346,7 @@ class _CalendarHeader extends StatelessWidget {
     required this.onTodayButtonTap,
     required this.onClearButtonTap,
     required this.clearButtonVisible,
+    required this.changeTheme,
   }) : super(key: key);
 
   @override
@@ -344,6 +375,13 @@ class _CalendarHeader extends StatelessWidget {
               visualDensity: VisualDensity.compact,
               onPressed: onClearButtonTap,
             ),
+          IconButton(
+            icon: const Icon(Icons.brightness_4),
+            onPressed: () {
+              changeTheme();
+              print(currentTheme.isDarkTheme);
+            },
+          ),
           const Spacer(),
           IconButton(
             icon: const Icon(Icons.chevron_left),
@@ -394,7 +432,6 @@ class _AlertDialogWidgetState extends State<_AlertDialogWidget> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
-            // height: MediaQuery.of(context).size.height * 0.54,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
@@ -405,6 +442,7 @@ class _AlertDialogWidgetState extends State<_AlertDialogWidget> {
                     decoration: const InputDecoration.collapsed(
                         hintText: 'Введите событие'),
                     controller: controller,
+                    style: TextStyle(color: Colors.black),
                   ),
                   const SizedBox(
                     height: 10,
