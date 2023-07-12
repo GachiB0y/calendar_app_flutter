@@ -12,9 +12,9 @@ class EventListLoaded extends EventListState {
   @override
   LinkedHashMap<DateTime, List<Event>> kEvents;
 
-  EventListLoaded.initial()
-      : kEvents = LinkedHashMap<DateTime, List<Event>>(
-            equals: isSameDay, hashCode: getHashCode);
+  // EventListLoaded.initial()
+  //     : kEvents = LinkedHashMap<DateTime, List<Event>>(
+  //           equals: isSameDay, hashCode: getHashCode);
 
   EventListLoaded({
     required this.kEvents,

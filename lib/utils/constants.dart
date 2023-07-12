@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
 
-Color kPrimeyColorGreen = const Color(0xFF56BE64);
-double? sizeIcon = 35;
-double? fontSizeTextCalendar = 24;
+const Color kPrimeyColorGreen = Color(0xFF56BE64);
+const double sizeIcon = 35;
+const double fontSizeTextCalendar = 28;

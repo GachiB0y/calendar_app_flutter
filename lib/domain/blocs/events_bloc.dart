@@ -30,7 +30,7 @@ class EventListViewBloc extends Bloc<EventListEvent, EventListState> {
                           title: 'Event $item | ${index + 1}',
                           date: DateTime.utc(
                               kFirstDay.year, kFirstDay.month, item * 5),
-                          time: TimeOfDay(hour: 8, minute: 00)))
+                          time: const TimeOfDay(hour: 8, minute: 00)))
           }..addAll({
               kToday: [
                 Event(

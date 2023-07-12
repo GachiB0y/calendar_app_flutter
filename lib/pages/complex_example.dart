@@ -211,18 +211,22 @@ class _TableComplexBlocLandscapeTestState
                         }),
                   )
                 : const SizedBox.shrink(),
-            appBar: AppBar(
-              backgroundColor: kPrimeyColorGreen,
-              title: const Center(
-                  child: Text(
-                "Переговорная на 2 этаже",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
-              )),
-            ),
+            // appBar: MyDropdownButton(),
+
+            //const Center(
+            //     child: Text(
+            //   "Переговорная на 2 этаже",
+            //   style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
+            // )),
+
             body: Padding(
-              padding: const EdgeInsets.only(top: 20.0),
+              padding: const EdgeInsets.only(top: 1.0),
               child: Column(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 20),
+                    child: MyDropdownButton(),
+                  ),
                   ValueListenableBuilder<DateTime>(
                     valueListenable: _focusedDay,
                     builder: (context, value, _) {
@@ -257,7 +261,7 @@ class _TableComplexBlocLandscapeTestState
                     },
                   ),
                   TableCalendar<Event>(
-                    daysOfWeekHeight: 28,
+                    daysOfWeekHeight: 32,
                     calendarStyle: CalendarStyle(
                       todayTextStyle: TextStyle(
                           color: Colors.white, fontSize: fontSizeTextCalendar),
@@ -287,8 +291,6 @@ class _TableComplexBlocLandscapeTestState
                       ),
                       holidayDecoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        border: const Border.fromBorderSide(
-                            BorderSide(color: Color(0xFF56BE64), width: 1.4)),
                         shape: BoxShape.rectangle,
                       ),
                       holidayTextStyle: TextStyle(
@@ -325,6 +327,20 @@ class _TableComplexBlocLandscapeTestState
                       }
                     },
                     calendarBuilders: CalendarBuilders(
+                      defaultBuilder: (context, day, focusedDay) {
+                        final dayNow = DateTime.now();
+                        final String text = day.day.toString();
+                        if (day.isBefore(dayNow)) {
+                          return Center(
+                            child: Text(
+                              text,
+                              style: TextStyle(
+                                  fontSize: fontSizeTextCalendar,
+                                  color: Colors.grey),
+                            ),
+                          );
+                        }
+                      },
                       dowBuilder: (context, day) {
                         if (day.weekday == DateTime.sunday ||
                             day.weekday == DateTime.saturday) {
@@ -623,6 +639,85 @@ class _AlertDialogEventInfo extends StatelessWidget {
                       style: TextStyle(fontSize: 24),
                     )))
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class MyDropdownButton extends StatefulWidget {
+  @override
+  _MyDropdownButtonState createState() => _MyDropdownButtonState();
+}
+
+class _MyDropdownButtonState extends State<MyDropdownButton> {
+  String? selectedRoom;
+  final List<String> meetingRoomsList = <String>[
+    'Переговорная на 1 этаже',
+    'Переговорная на 21 этаже',
+    'Переговорная на 22 этаже',
+    'Переговорная на 23 этаже',
+    'Переговорная на 24 этаже',
+    'Переговорная на 25 этаже',
+    'Переговорная на 26 этаже',
+    'Переговорная на 27 этаже',
+    'Переговорная на 28 этаже',
+    'Переговорная на 29 этаже',
+    'Переговорная на 222 этаже',
+    'Переговорная на 233 этаже',
+    'Переговорная на 244 этаже',
+    'Переговорная на 255 этаже',
+    'Переговорная на 266 этаже',
+    'Переговорная на 277 этаже',
+    'Переговорная на 288 этаже',
+    'Переговорная на 299 этаже',
+    'Переговорная на 1 этаже новый корпус',
+    'Переговорная на 2 этаже новый корпус'
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          color: const Color(0xFFb3f2b2),
+          borderRadius: BorderRadius.circular(10)),
+      padding: const EdgeInsets.all(8.0),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton(
+          iconSize: sizeIcon,
+          borderRadius: BorderRadius.circular(10),
+          hint: const Text('Выберите переговорную'),
+          style: const TextStyle(fontSize: 30, color: Colors.black),
+          value: selectedRoom,
+          items: meetingRoomsList.map((String room) {
+            return DropdownMenuItem(
+              value: room,
+              child: Row(
+                children: [
+                  Text(
+                    room,
+                  ),
+                  selectedRoom == room
+                      ? const Padding(
+                          padding: EdgeInsets.only(
+                            left: 8.0,
+                          ),
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.green,
+                            size: 26,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: (newValue) {
+            setState(() {
+              selectedRoom = newValue;
+            });
+          },
         ),
       ),
     );
