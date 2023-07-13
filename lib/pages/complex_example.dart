@@ -524,7 +524,7 @@ class _AlertDialogAddEventWidget extends StatefulWidget {
       required Event event,
       required EventListViewBloc eventBloc}) addEvent;
   final DateTime? focusedDay;
-  const _AlertDialogAddEventWidget({
+  _AlertDialogAddEventWidget({
     Key? key,
     required this.selectedEvents,
     required this.addEvent,
@@ -539,10 +539,42 @@ class _AlertDialogAddEventWidget extends StatefulWidget {
 
 class _AlertDialogAddEventWidgetState
     extends State<_AlertDialogAddEventWidget> {
+  final _formKey = GlobalKey<FormState>();
+  String errorMessage = '';
+  Duration duration = const Duration(hours: 0, minutes: 0);
+  TextEditingController controller = TextEditingController();
+
+  void _showDialog(Widget child) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => Container(
+        width: 600,
+        height: 216,
+        padding: const EdgeInsets.only(top: 6.0),
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: SafeArea(
+          top: false,
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  String getTimeFromMins(int mins) {
+    int hours = (mins ~/ 60);
+    int minutes = mins % 60;
+    return '$hours ч. $minutes м.';
+  }
+
   @override
   Widget build(BuildContext context) {
-    TextEditingController controller = TextEditingController();
     FocusNode _focusNode = FocusNode();
+    final time = getTimeFromMins(duration.inMinutes);
+    final TimeOfDay timeToFormat = TimeOfDay(
+        hour: duration.inMinutes ~/ 60, minute: duration.inMinutes % 60);
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
       child: Column(
@@ -558,9 +590,18 @@ class _AlertDialogAddEventWidgetState
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextField(
+                  errorMessage != ''
+                      ? Text(
+                          errorMessage,
+                          style: TextStyle(fontSize: 18, color: Colors.red),
+                        )
+                      : SizedBox.shrink(),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  TextFormField(
                     focusNode: _focusNode,
                     decoration: const InputDecoration.collapsed(
                         hintText: 'Введите событие'),
@@ -570,55 +611,65 @@ class _AlertDialogAddEventWidgetState
                   const SizedBox(
                     height: 20,
                   ),
-                  ElevatedButton(
-                      onPressed: () async {
-                        _focusNode.unfocus();
-
-                        final TimeOfDay? time = await showTimePicker(
-                          helpText: 'Выберите время',
-                          cancelText: 'Закрыть',
-                          confirmText: 'Добавить',
-                          hourLabelText: 'Часы',
-                          minuteLabelText: 'Минуты',
-                          context: context,
-                          initialTime: TimeOfDay.now(),
-                          builder: (BuildContext context, Widget? child) {
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                // timePickerTheme: CustomTheme.timePickerTheme,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                // buttonTheme:
-                                //     ButtonThemeData(minWidth: 100, height: 50),
+                  Row(
+                    children: [
+                      Text(
+                        'Время события: $time',
+                        style:
+                            const TextStyle(color: Colors.black, fontSize: 24),
+                      ),
+                      IconButton(
+                          onPressed: () => _showDialog(
+                                CupertinoTimerPicker(
+                                  mode: CupertinoTimerPickerMode.hm,
+                                  initialTimerDuration: duration,
+                                  onTimerDurationChanged:
+                                      (Duration newDuration) {
+                                    print(newDuration.inHours);
+                                    setState(() => duration = newDuration);
+                                  },
+                                ),
                               ),
-                              child: MediaQuery(
-                                data: MediaQuery.of(context).copyWith(
-                                    alwaysUse24HourFormat: true,
-                                    textScaleFactor: 1.4),
-                                child: child!,
-                              ),
-                            );
-                          },
-                        );
+                          icon: const Icon(
+                            CupertinoIcons.time_solid,
+                            size: sizeIcon,
+                            color: kPrimeyColorGreen,
+                          ))
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Center(
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          if (controller.text.isEmpty) {
+                            setState(() {
+                              errorMessage = 'Пожалуйста, введите событие!';
+                            });
+                          } else {
+                            setState(() {
+                              errorMessage = '';
+                            });
+                            _focusNode.unfocus();
+                            final event = Event(
+                                title: controller.text,
+                                date: widget.focusedDay,
+                                time: timeToFormat);
 
-                        final event = Event(
-                            title: controller.text,
-                            date: widget.focusedDay,
-                            time: time);
+                            widget.addEvent(
+                                day: widget.focusedDay,
+                                event: event,
+                                eventBloc: widget.eventBloc);
 
-                        if (time != null) {
-                          widget.addEvent(
-                              day: widget.focusedDay,
-                              event: event,
-                              eventBloc: widget.eventBloc);
-                        }
-
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text(
-                        'Далее',
-                        style: TextStyle(color: Colors.black, fontSize: 24),
-                      ))
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: const Text(
+                          'Добавить',
+                          style: TextStyle(color: Colors.black, fontSize: 24),
+                        )),
+                  )
                 ],
               ),
             ),
