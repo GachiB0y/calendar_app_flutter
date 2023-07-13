@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:calendar_app_flutter/domain/entity/event.dart';
-import 'package:flutter/material.dart';
 
 class MeetingRoom {
   final String title;

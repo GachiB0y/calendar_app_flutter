@@ -29,3 +29,17 @@ class EventListEventAdd extends EventListEvent {
     required this.getEventsForDaysWidget,
   });
 }
+
+class EventChangeMeetingRoom extends EventListEvent {
+  late final String titileMettingRoom;
+  late final ValueNotifier<List<Event>> selectedEventsWidget;
+  late final DateTime? selectedDayWidget;
+  late final List<Event> Function(DateTime? days) getEventsForDaysWidget;
+
+  EventChangeMeetingRoom({
+    required this.titileMettingRoom,
+    required this.selectedEventsWidget,
+    required this.selectedDayWidget,
+    required this.getEventsForDaysWidget,
+  });
+}

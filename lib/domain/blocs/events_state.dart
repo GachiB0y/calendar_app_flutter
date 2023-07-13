@@ -1,30 +1,41 @@
 part of 'events_bloc.dart';
 
 abstract class EventListState {
-  final LinkedHashMap<DateTime, List<Event>> kEvents =
-      LinkedHashMap<DateTime, List<Event>>(
-    equals: isSameDay,
-    hashCode: getHashCode,
-  );
+  // final LinkedHashMap<DateTime, List<Event>> kEvents =
+  //     LinkedHashMap<DateTime, List<Event>>(
+  //   equals: isSameDay,
+  //   hashCode: getHashCode,
+  // );
+
+  MeetingRoom meetingRoom = MeetingRoom(
+      kEvents: LinkedHashMap<DateTime, List<Event>>(
+        equals: isSameDay,
+        hashCode: getHashCode,
+      ),
+      title: '');
+
+  final List<String> listNameRooms = [];
 }
 
 class EventListLoaded extends EventListState {
   @override
-  LinkedHashMap<DateTime, List<Event>> kEvents;
-
-  // EventListLoaded.initial()
-  //     : kEvents = LinkedHashMap<DateTime, List<Event>>(
-  //           equals: isSameDay, hashCode: getHashCode);
+  final MeetingRoom meetingRoom;
+  @override
+  final List<String> listNameRooms;
 
   EventListLoaded({
-    required this.kEvents,
+    required this.meetingRoom,
+    required this.listNameRooms,
+    //  required LinkedHashMap<DateTime, List<Event>> kEvents,
   });
 
   EventListLoaded copyWith({
-    LinkedHashMap<DateTime, List<Event>>? kEvents,
+    MeetingRoom? meetingRoom,
+    List<String>? listNameRooms,
   }) {
     return EventListLoaded(
-      kEvents: kEvents ?? this.kEvents,
+      meetingRoom: meetingRoom ?? this.meetingRoom,
+      listNameRooms: listNameRooms ?? this.listNameRooms,
     );
   }
 
@@ -33,12 +44,15 @@ class EventListLoaded extends EventListState {
       identical(this, other) ||
       other is EventListLoaded &&
           runtimeType == other.runtimeType &&
-          kEvents == other.kEvents;
+          meetingRoom == other.meetingRoom &&
+          listNameRooms == other.listNameRooms;
 
   @override
-  int get hashCode => kEvents.hashCode;
+  int get hashCode => meetingRoom.hashCode;
 }
 
 class EventInitial extends EventListState {}
 
 class EventIsError extends EventListState {}
+
+class EventIsLoading extends EventListState {}

@@ -59,7 +59,7 @@ class _TableComplexBlocLandscapeTestState
     final EventListViewBloc eventBloc = context.read<EventListViewBloc>();
     List<Event>? events;
     if (eventBloc.state is EventListLoaded) {
-      events = eventBloc.state.kEvents[day];
+      events = eventBloc.state.meetingRoom.kEvents[day];
     }
 
     return events ?? [];
@@ -176,7 +176,7 @@ class _TableComplexBlocLandscapeTestState
       listener: (context, state) => EventListViewBloc(),
       child: BlocBuilder<EventListViewBloc, EventListState>(
           builder: (context, state) {
-        if (state is EventInitial) {
+        if (state is EventInitial || state is EventIsLoading) {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
@@ -200,10 +200,13 @@ class _TableComplexBlocLandscapeTestState
                                 focusedDay: _selectedDay,
                               ),
                             ),
-                            icon: const Icon(Icons.add),
-                            label: Text(
-                              "Добавить событие на день: ${_selectedDay?.day}",
-                              style: const TextStyle(fontSize: 24),
+                            icon: const Icon(
+                              Icons.add,
+                              size: sizeIcon,
+                            ),
+                            label: const Text(
+                              "Добавить",
+                              style: TextStyle(fontSize: 28),
                             ),
                           );
                         }),
@@ -216,7 +219,12 @@ class _TableComplexBlocLandscapeTestState
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0, bottom: 20),
-                      child: MyDropdownButton(),
+                      child: DropDownMenuMettingRooms(
+                        eventBloc: eventBloc,
+                        getEventsForDaysWidget: _getEventsForDay,
+                        selectedEventsWidget: _selectedEvents,
+                        selectedDayWidget: _selectedDay,
+                      ),
                     ),
                     ValueListenableBuilder<DateTime>(
                       valueListenable: _focusedDay,
@@ -588,7 +596,7 @@ class _AlertDialogAddEventWidgetState
                         Navigator.of(context).pop();
                       },
                       child: const Text(
-                        'Добавить',
+                        'Далее',
                         style: TextStyle(color: Colors.black, fontSize: 24),
                       ))
                 ],
@@ -640,38 +648,33 @@ class _AlertDialogEventInfo extends StatelessWidget {
   }
 }
 
-class MyDropdownButton extends StatefulWidget {
+class DropDownMenuMettingRooms extends StatefulWidget {
+  final EventListViewBloc eventBloc;
+  final ValueNotifier<List<Event>> selectedEventsWidget;
+  final DateTime? selectedDayWidget;
+  final List<Event> Function(DateTime? days) getEventsForDaysWidget;
+
+  const DropDownMenuMettingRooms(
+      {super.key,
+      required this.eventBloc,
+      required this.selectedEventsWidget,
+      required this.selectedDayWidget,
+      required this.getEventsForDaysWidget});
   @override
-  _MyDropdownButtonState createState() => _MyDropdownButtonState();
+  _DropDownMenuMettingRoomsState createState() =>
+      _DropDownMenuMettingRoomsState();
 }
 
-class _MyDropdownButtonState extends State<MyDropdownButton> {
+class _DropDownMenuMettingRoomsState extends State<DropDownMenuMettingRooms> {
   String? selectedRoom;
-  final List<String> meetingRoomsList = <String>[
-    'Переговорная на 1 этаже',
-    'Переговорная на 21 этаже',
-    'Переговорная на 22 этаже',
-    'Переговорная на 23 этаже',
-    'Переговорная на 24 этаже',
-    'Переговорная на 25 этаже',
-    'Переговорная на 26 этаже',
-    'Переговорная на 27 этаже',
-    'Переговорная на 28 этаже',
-    'Переговорная на 29 этаже',
-    'Переговорная на 222 этаже',
-    'Переговорная на 233 этаже',
-    'Переговорная на 244 этаже',
-    'Переговорная на 255 этаже',
-    'Переговорная на 266 этаже',
-    'Переговорная на 277 этаже',
-    'Переговорная на 288 этаже',
-    'Переговорная на 299 этаже',
-    'Переговорная на 1 этаже новый корпус',
-    'Переговорная на 2 этаже новый корпус'
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final eventBloc = context.watch<EventListViewBloc>();
+    selectedRoom = eventBloc.state.meetingRoom.title;
+
+    final meetingRoomsList = eventBloc.state.listNameRooms;
+
     return Container(
       decoration: BoxDecoration(
           color: const Color(0xFFb3f2b2),
@@ -712,6 +715,12 @@ class _MyDropdownButtonState extends State<MyDropdownButton> {
             setState(() {
               selectedRoom = newValue;
             });
+            eventBloc.add(EventChangeMeetingRoom(
+              titileMettingRoom: newValue!,
+              getEventsForDaysWidget: widget.getEventsForDaysWidget,
+              selectedDayWidget: widget.selectedDayWidget,
+              selectedEventsWidget: widget.selectedEventsWidget,
+            ));
           },
         ),
       ),
