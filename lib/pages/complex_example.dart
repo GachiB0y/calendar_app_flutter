@@ -1,6 +1,8 @@
 import 'package:calendar_app_flutter/domain/blocs/events_bloc.dart';
+import 'package:calendar_app_flutter/domain/repository/event_repositort.dart';
 import 'package:calendar_app_flutter/utils/config.dart';
 import 'package:calendar_app_flutter/utils/constants.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +13,8 @@ import '../domain/entity/event.dart';
 import '../utils/utils.dart';
 
 class TableComplexBlocLandscapeTest extends StatefulWidget {
-  const TableComplexBlocLandscapeTest({super.key});
+  final IRepo repo;
+  const TableComplexBlocLandscapeTest({super.key, required this.repo});
 
   @override
   _TableComplexBlocLandscapeTestState createState() =>
@@ -173,7 +176,8 @@ class _TableComplexBlocLandscapeTestState
   Widget build(BuildContext context) {
     final EventListViewBloc eventBloc = context.watch<EventListViewBloc>();
     return BlocListener<EventListViewBloc, EventListState>(
-      listener: (context, state) => EventListViewBloc(),
+      listener: (context, state) =>
+          EventListViewBloc(eventsRepository: widget.repo),
       child: BlocBuilder<EventListViewBloc, EventListState>(
           builder: (context, state) {
         if (state is EventInitial || state is EventIsLoading) {
@@ -184,6 +188,7 @@ class _TableComplexBlocLandscapeTestState
           );
         } else if (state is EventListLoaded) {
           return Scaffold(
+            resizeToAvoidBottomInset: false,
             floatingActionButton: _selectedDayActive != null
                 ? FittedBox(
                     child: ValueListenableBuilder<List<Event>>(
@@ -343,6 +348,7 @@ class _TableComplexBlocLandscapeTestState
                               ),
                             );
                           }
+                          return null;
                         },
                         dowBuilder: (context, day) {
                           if (day.weekday == DateTime.sunday ||
@@ -536,7 +542,7 @@ class _AlertDialogAddEventWidgetState
   @override
   Widget build(BuildContext context) {
     TextEditingController controller = TextEditingController();
-
+    FocusNode _focusNode = FocusNode();
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
       child: Column(
@@ -555,6 +561,7 @@ class _AlertDialogAddEventWidgetState
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextField(
+                    focusNode: _focusNode,
                     decoration: const InputDecoration.collapsed(
                         hintText: 'Введите событие'),
                     controller: controller,
@@ -565,19 +572,29 @@ class _AlertDialogAddEventWidgetState
                   ),
                   ElevatedButton(
                       onPressed: () async {
+                        _focusNode.unfocus();
+
                         final TimeOfDay? time = await showTimePicker(
+                          helpText: 'Выберите время',
+                          cancelText: 'Закрыть',
+                          confirmText: 'Добавить',
+                          hourLabelText: 'Часы',
+                          minuteLabelText: 'Минуты',
                           context: context,
                           initialTime: TimeOfDay.now(),
                           builder: (BuildContext context, Widget? child) {
                             return Theme(
                               data: Theme.of(context).copyWith(
+                                // timePickerTheme: CustomTheme.timePickerTheme,
                                 materialTapTargetSize:
-                                    MaterialTapTargetSize.padded,
+                                    MaterialTapTargetSize.shrinkWrap,
+                                // buttonTheme:
+                                //     ButtonThemeData(minWidth: 100, height: 50),
                               ),
                               child: MediaQuery(
                                 data: MediaQuery.of(context).copyWith(
-                                  alwaysUse24HourFormat: true,
-                                ),
+                                    alwaysUse24HourFormat: true,
+                                    textScaleFactor: 1.4),
                                 child: child!,
                               ),
                             );
@@ -588,10 +605,13 @@ class _AlertDialogAddEventWidgetState
                             title: controller.text,
                             date: widget.focusedDay,
                             time: time);
-                        widget.addEvent(
-                            day: widget.focusedDay,
-                            event: event,
-                            eventBloc: widget.eventBloc);
+
+                        if (time != null) {
+                          widget.addEvent(
+                              day: widget.focusedDay,
+                              event: event,
+                              eventBloc: widget.eventBloc);
+                        }
 
                         Navigator.of(context).pop();
                       },
