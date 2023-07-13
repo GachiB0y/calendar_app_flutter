@@ -1,18 +1,25 @@
+import 'package:calendar_app_flutter/domain/repository/event_repositort.dart';
 import 'package:calendar_app_flutter/pages/complex_example.dart';
 
 import 'package:flutter/material.dart';
 
 class CalendarMainScreen extends StatelessWidget {
-  const CalendarMainScreen({super.key});
+  final IRepo repo;
+  const CalendarMainScreen({super.key, required this.repo});
 
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (context, orientation) {
         if (orientation == Orientation.landscape) {
-          return const Center(child: TableComplexBlocLandscapeTest());
+          return Center(
+              child: TableComplexBlocLandscapeTest(
+            repo: repo,
+          ));
         } else {
-          return const TableComplexBlocLandscapeTest();
+          return TableComplexBlocLandscapeTest(
+            repo: repo,
+          );
         }
       },
     );

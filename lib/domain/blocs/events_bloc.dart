@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:bloc/bloc.dart';
 import 'package:calendar_app_flutter/domain/api_client/event_api_client.dart';
-import 'package:calendar_app_flutter/domain/entity/meetingRoom.dart';
+import 'package:calendar_app_flutter/domain/entity/meeting_room.dart';
 import 'package:calendar_app_flutter/domain/repository/event_repositort.dart';
 import 'package:calendar_app_flutter/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +16,9 @@ part 'events_state.dart';
 
 class EventListViewBloc extends Bloc<EventListEvent, EventListState> {
   final _eventApiClient = EventApiClient();
-  final EventsRepository eventsRepository = EventsRepository();
+  final IRepo eventsRepository;
 
-  EventListViewBloc() : super(EventInitial()) {
+  EventListViewBloc({required this.eventsRepository}) : super(EventInitial()) {
     on<EventListEvent>(
       (event, emit) async {
         if (event is EventListEventLoad) {
@@ -83,7 +83,7 @@ class EventListViewBloc extends Bloc<EventListEvent, EventListState> {
           event.selectedEventsWidget.value =
               event.getEventsForDaysWidget(event.selectedDaysWidget);
         } else if (event is EventListEventAdd) {
-          addEventForDay(event, emit);
+          await addEventForDay(event, emit);
         } else if (event is EventChangeMeetingRoom) {
           emit(EventIsLoading());
           await changeMeetingRoom(event, emit);
@@ -95,7 +95,8 @@ class EventListViewBloc extends Bloc<EventListEvent, EventListState> {
   Future<void> onFriendListEventLoad(
       EventListEventAdd event, Emitter<EventListState> emit) async {}
 
-  void addEventForDay(EventListEventAdd event, Emitter<EventListState> emit) {
+  Future<void> addEventForDay(
+      EventListEventAdd event, Emitter<EventListState> emit) async {
     if (state.meetingRoom.kEvents[event.day] == null) {
       final eventsList = <Event>[];
       eventsList.add(event.event);
@@ -105,6 +106,10 @@ class EventListViewBloc extends Bloc<EventListEvent, EventListState> {
       state.meetingRoom.kEvents.addAll(kEventSource);
     } else {
       state.meetingRoom.kEvents[event.day]!.add(event.event);
+      // final newMeetingRoom = state.meetingRoom;
+      // final listNameRooms = state.listNameRooms;
+      // emit(EventListLoaded(
+      //     meetingRoom: newMeetingRoom, listNameRooms: listNameRooms));
     }
     event.selectedEventsWidget.value =
         event.getEventsForDaysWidget(event.selectedDayWidget);
@@ -114,7 +119,8 @@ class EventListViewBloc extends Bloc<EventListEvent, EventListState> {
       EventChangeMeetingRoom event, Emitter<EventListState> emit) async {
     final titileMettingRoom = event.titileMettingRoom;
 
-    final kEvent = await _eventApiClient.getMeetingRoom(titileMettingRoom);
+    final kEvent = await eventsRepository.getMeetingRoom(titileMettingRoom);
+    // final kEvent = await _eventApiClient.getMeetingRoom(titileMettingRoom);
     final MeetingRoom room =
         MeetingRoom(kEvents: kEvent, title: titileMettingRoom);
     final listNameRooms = await _eventApiClient.getTitleRooms();

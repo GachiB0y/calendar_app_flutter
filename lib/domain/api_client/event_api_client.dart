@@ -16,22 +16,22 @@ class EventApiClient {
             List.generate(
                 item % 4 + 1,
                 (index) => Event(
-                    title: '${titileMettingRoom} Event $item | ${index + 10}',
+                    title: '$titileMettingRoom Event $item | ${index + 10}',
                     date: DateTime.utc(
                         kFirstDay.year, kFirstDay.month, item * count),
                     time: const TimeOfDay(hour: 8, minute: 00)))
     }..addAll({
         kToday: [
           Event(
-              title: 'Today\'s Event 1 ${titileMettingRoom}',
+              title: 'Today\'s Event 1 $titileMettingRoom',
               date: kToday,
               time: const TimeOfDay(hour: 10, minute: 00)),
           Event(
-              title: 'Today\'s Event 2 ${titileMettingRoom}',
+              title: 'Today\'s Event 2 $titileMettingRoom',
               date: kToday,
               time: const TimeOfDay(hour: 17, minute: 00)),
           Event(
-              title: 'Today\'s Event 5 ${titileMettingRoom}',
+              title: 'Today\'s Event 5 $titileMettingRoom',
               date: kToday,
               time: const TimeOfDay(hour: 12, minute: 30)),
         ],
