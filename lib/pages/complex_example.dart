@@ -569,6 +569,21 @@ class _AlertDialogAddEventWidgetState
     return '$hours ч. $minutes м.';
   }
 
+  bool isTimeOnRepeat(
+      {required TimeOfDay time,
+      required DateTime? focusedDay,
+      required EventListViewBloc eventBloc}) {
+    final listTime = eventBloc.state.meetingRoom.kEvents[focusedDay];
+
+    for (var element in listTime as List<Event>) {
+      if (element.time?.hour == time.hour &&
+          element.time?.minute == time.minute) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     FocusNode _focusNode = FocusNode();
@@ -595,9 +610,10 @@ class _AlertDialogAddEventWidgetState
                   errorMessage != ''
                       ? Text(
                           errorMessage,
-                          style: TextStyle(fontSize: 18, color: Colors.red),
+                          style:
+                              const TextStyle(fontSize: 18, color: Colors.red),
                         )
-                      : SizedBox.shrink(),
+                      : const SizedBox.shrink(),
                   const SizedBox(
                     height: 5,
                   ),
@@ -621,11 +637,11 @@ class _AlertDialogAddEventWidgetState
                       IconButton(
                           onPressed: () => _showDialog(
                                 CupertinoTimerPicker(
+                                  minuteInterval: 15,
                                   mode: CupertinoTimerPickerMode.hm,
                                   initialTimerDuration: duration,
                                   onTimerDurationChanged:
                                       (Duration newDuration) {
-                                    print(newDuration.inHours);
                                     setState(() => duration = newDuration);
                                   },
                                 ),
@@ -648,21 +664,31 @@ class _AlertDialogAddEventWidgetState
                               errorMessage = 'Пожалуйста, введите событие!';
                             });
                           } else {
-                            setState(() {
-                              errorMessage = '';
-                            });
-                            _focusNode.unfocus();
-                            final event = Event(
-                                title: controller.text,
-                                date: widget.focusedDay,
-                                time: timeToFormat);
+                            final bool isDublicate = isTimeOnRepeat(
+                              eventBloc: widget.eventBloc,
+                              focusedDay: widget.focusedDay,
+                              time: timeToFormat,
+                            );
 
-                            widget.addEvent(
-                                day: widget.focusedDay,
-                                event: event,
-                                eventBloc: widget.eventBloc);
+                            if (isDublicate) {
+                              setState(() {
+                                errorMessage =
+                                    'Время занятно, выберите другое время';
+                              });
+                            } else {
+                              _focusNode.unfocus();
+                              final event = Event(
+                                  title: controller.text,
+                                  date: widget.focusedDay,
+                                  time: timeToFormat);
 
-                            Navigator.of(context).pop();
+                              widget.addEvent(
+                                  day: widget.focusedDay,
+                                  event: event,
+                                  eventBloc: widget.eventBloc);
+
+                              Navigator.of(context).pop();
+                            }
                           }
                         },
                         child: const Text(
